@@ -68,7 +68,7 @@ test_dl  = DataLoader(testDataset, batch_size=args.batch_size, shuffle=True, num
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-EDmodel = CasFNE_5N(featdim=32).to(device)
+EDmodel = CasFNE_3N(featdim=32).to(device)
 D_model_path = args.model_path
 load_Mod = torch.load(D_model_path)
 EDmodel.load_state_dict(load_Mod['model'])
@@ -97,15 +97,13 @@ with torch.no_grad():
     for index, image in enumerate(test_dl):
         img_orig = image[0].to(device)
         img_orig_L = image[1].to(device)
-        face_path = image[2]
+        face_path = image[3]
         b, c, w, h = img_orig.shape
 
-        predNorm = EDmodel(img_orig)
-        img_Ce_Norm_C = F.normalize(predNorm[-1])
-
-        for ii in range(b):
-            tpName = face_path[ii].split('/')[-1]   # face_path[ii][-9:]
-            save_image(img_orig[ii], os.path.join(testImgsPath, tpName.replace('.png', '_input.png')), nrow=1, normalize=True)
-            save_image(get_normal_255(N_SFS2CM(img_Ce_Norm_C))[ii], os.path.join(testImgsPath, tpName.replace('.png', '_norm1.png')), nrow=1, normalize=True)
-        print(index, len(test_dl))
+        _, _, predNorm3 = EDmodel(img_orig)
+        model_output_perm = predNorm3.permute(0, 2, 3, 1)
+        model_output_np = model_output_perm.cpu().numpy()[0]
+        dest_path = os.path.join(args.dest_dir, str(face_path).replace("crop.jpg", "predict.npy"))
+        Path(dest_path).parent.mkdir(exist_ok=True, parents=True)
+        np.save(dest_path, model_output_np)
 
