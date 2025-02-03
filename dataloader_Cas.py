@@ -16,12 +16,12 @@ import copy, random
 
 IMAGE_SIZE = 256
 #-------------------------- start photoface dataset ---------------------
-def getPhotoDB(csvPath=None, IMAGE_SIZE=256):
+def getPhotoDB(csvPath=None, root_dir=None, IMAGE_SIZE=256):
 
-    df = pd.read_csv(csvPath)
-    face = list(df['face'])
+    df = pd.read_csv(csvPath, header=None)
+    face = df[0].tolist()
 
-    dataset_size = len(face)
+    dataset_size = len(df)
 
     # Build custom datasets
     transform = transforms.Compose([
@@ -29,7 +29,7 @@ def getPhotoDB(csvPath=None, IMAGE_SIZE=256):
         transforms.ToTensor()
     ])
 
-    test_dataset = PhotoDBPretrain(face, transform)
+    test_dataset = PhotoDBPretrain(face, root_dir, transform)
     return test_dataset
 
 class PhotoDBPretrain(Dataset):
@@ -46,17 +46,21 @@ class PhotoDBPretrain(Dataset):
         self._tensor = transforms.ToTensor()
 
     def __getitem__(self, index):
-        face_path = self.face[index]
-        face_path = os.path.join(self.root_dir, face_path)
+        face_name = self.face[index]
+        face_path = os.path.join(self.root_dir, str(face_name))
         faceimg = Image.open(face_path)
         faceimg_ten = self._tensor(faceimg)
         faceimg_L = faceimg.convert('L')
 
         face_L = self._tensor(faceimg_L)
 
-        gt_path = os.path.join(Path(face_path).parent, '/sn.npy')
-        gt = self.DataTrans(np.load(gt_path))
-        return faceimg_ten, face_L, gt, face_path
+        # gt_path = os.path.join(Path(face_path).parent, 'sn.npy')
+        # gt_array = np.load(gt_path)
+        # gt_tensor = torch.from_numpy(gt_array)     
+        # if gt_tensor.dim() == 3 and gt_tensor.shape[2] in [1,3]:
+        #     gt_tensor = gt_tensor.permute(2, 0, 1)   
+        # gt = self.DataTrans(gt_tensor.float())
+        return faceimg_ten, face_L, str(face_name)
 
     def __len__(self):
         return self.dataset_len
