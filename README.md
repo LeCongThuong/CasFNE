@@ -22,13 +22,7 @@ From top to bottom are the input face, exemplar and refinement normal.
 * [FFHQ](https://drive.google.com/drive/folders/1u2xu7bSrWxrbUxk-dT-UvEJq8IjdmNTP) 
 * [CelebAMask-HQ](https://github.com/switchablenorms/CelebAMask-HQ)
 #### Download checkpoints: 
-* [cpkts](https://drive.google.com/file/d/1jOjVeLVOXLWWu1HACcK_H9BjhBXCOaN7/view?usp=drive_link)
-
-
-For training run:
-```
-python  train.py 
-```
+* [cpkts](https://drive.google.com/drive/folders/1_mOEuEHVZThBMiUyh4HKdoAko1wOFgW_)
 
 For testing run:
 ```
